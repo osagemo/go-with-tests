@@ -1,12 +1,11 @@
 package game
 
 import (
-	"os"
 	"testing"
 )
 
 func TestFileSystemStore(t *testing.T) {
-	tempFile := createTempFile(t, `[
+	tempFile := CreateTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
 
@@ -29,10 +28,10 @@ func TestFileSystemStore(t *testing.T) {
 			{"Cleo", 10},
 		}
 		got := store.GetLeague()
-		assertLeague(t, want, got)
+		AssertLeague(t, want, got)
 
 		got = store.GetLeague()
-		assertLeague(t, want, got)
+		AssertLeague(t, want, got)
 	})
 
 	t.Run("league is sorted by wins", func(t *testing.T) {
@@ -41,7 +40,7 @@ func TestFileSystemStore(t *testing.T) {
 			{"Cleo", 10},
 		}
 		got := store.GetLeague()
-		assertLeague(t, got, want)
+		AssertLeague(t, got, want)
 	})
 
 	t.Run("record player score", func(t *testing.T) {
@@ -61,27 +60,4 @@ func TestFileSystemStore(t *testing.T) {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	})
-}
-
-// createTempFile creates a temp file with the given data and registers cleanup with t.Cleanup
-func createTempFile(t *testing.T, data string) *os.File {
-	t.Helper()
-
-	tmpFile, err := os.CreateTemp("", "db")
-	if err != nil {
-		t.Fatalf("could not create temp file: %v", err)
-	}
-
-	if _, err := tmpFile.Write([]byte(data)); err != nil {
-		tmpFile.Close()
-		os.Remove(tmpFile.Name())
-		t.Fatalf("could not write to temp file: %v", err)
-	}
-
-	t.Cleanup(func() {
-		tmpFile.Close()
-		os.Remove(tmpFile.Name())
-	})
-
-	return tmpFile
 }

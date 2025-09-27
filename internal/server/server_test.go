@@ -1,12 +1,13 @@
-package game
+package server
 
 import (
 	"bytes"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
+
+	"github.com/osagemo/go-with-tests/internal/game"
 )
 
 func TestGETPlayers(t *testing.T) {
@@ -93,12 +94,12 @@ func TestLeague(t *testing.T) {
 		assertResponseContentType(t, response, "application/json")
 		assertResponseStatus(t, response, http.StatusOK)
 
-		want := []Player{
+		want := []game.Player{
 			{"king", 20},
 			{"sven", 10},
 		}
 		got := getLeagueFromResponse(t, response.Body)
-		assertLeague(t, got, want)
+		game.AssertLeague(t, got, want)
 	})
 }
 
@@ -112,19 +113,13 @@ func newGetLeagueRequest() *http.Request {
 	return request
 }
 
-func getLeagueFromResponse(t *testing.T, body *bytes.Buffer) []Player {
-	got, err := LeagueFromJson(body)
+func getLeagueFromResponse(t *testing.T, body *bytes.Buffer) []game.Player {
+	got, err := game.LeagueFromJson(body)
 	if err != nil {
 		t.Fatalf("Unable to decode league request body: %v", err)
 	}
 
 	return got
-}
-
-func assertLeague(t *testing.T, got, want []Player) {
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v want %v", got, want)
-	}
 }
 
 func newPostWinRequest(name string) *http.Request {
@@ -172,10 +167,10 @@ func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
 }
 
-func (s *StubPlayerStore) GetLeague() League {
-	league := []Player{}
+func (s *StubPlayerStore) GetLeague() game.League {
+	league := []game.Player{}
 	for name, wins := range s.scores {
-		league = append(league, Player{Name: name, Wins: wins})
+		league = append(league, game.Player{Name: name, Wins: wins})
 	}
 	return league
 }

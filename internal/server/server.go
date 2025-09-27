@@ -1,31 +1,21 @@
-package game
+package server
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/osagemo/go-with-tests/internal/game"
 	"net/http"
 	"strings"
 )
 
-type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
-	GetLeague() League
-}
-
 type PlayerServer struct {
-	store PlayerStore
+	store game.PlayerStore
 	http.Handler
-}
-
-type Player struct {
-	Name string `json:"Name"`
-	Wins int    `json:"Wins"`
 }
 
 const jsonContentType = "application/json"
 
-func NewPlayerServer(store PlayerStore) *PlayerServer {
+func NewPlayerServer(store game.PlayerStore) *PlayerServer {
 	server := new(PlayerServer)
 	server.store = store
 

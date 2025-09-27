@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/quii/learn-go-with-tests/command-line/v1"
+	"github.com/osagemo/go-with-tests/internal/game"
+	"github.com/osagemo/go-with-tests/internal/server"
 	"log"
 	"net/http"
 	"os"
@@ -16,13 +17,13 @@ func main() {
 		log.Fatalf("problem opening %s %v", dbFileName, err)
 	}
 
-	store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := game.NewFileSystemPlayerStore(db)
 
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v ", err)
 	}
 
-	server := poker.NewPlayerServer(store)
+	server := server.NewPlayerServer(store)
 
 	log.Fatal(http.ListenAndServe(":5000", server))
 }

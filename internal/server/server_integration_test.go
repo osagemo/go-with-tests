@@ -1,16 +1,16 @@
-package game
+package server
 
 import (
+	"github.com/osagemo/go-with-tests/internal/game"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	file, removeFile := createTempFile(t, "")
-	defer removeFile()
+	file := game.CreateTempFile(t, "")
 
-	store, err := NewFileSystemPlayerStore(file)
+	store, err := game.NewFileSystemPlayerStore(file)
 	if err != nil {
 		t.Fatalf("could not create file system store, %v", err)
 	}
@@ -35,10 +35,10 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 		server.ServeHTTP(response, newGetLeagueRequest())
 		assertResponseStatus(t, response, http.StatusOK)
 
-		want := []Player{
+		want := []game.Player{
 			{"ostron", 3},
 		}
 		got := getLeagueFromResponse(t, response.Body)
-		assertLeague(t, got, want)
+		game.AssertLeague(t, got, want)
 	})
 }
