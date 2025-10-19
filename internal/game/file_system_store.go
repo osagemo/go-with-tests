@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"slices"
 )
@@ -22,6 +23,26 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 		return nil, fmt.Errorf("problem loading player store from file: %v", err)
 	}
 	return &FileSystemPlayerStore{file, league}, nil
+}
+
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		log.Fatalf("problem opening %s %v", path, err)
+	}
+
+	closeFunc := func() {
+		db.Close()
+	}
+
+	store, err := NewFileSystemPlayerStore(db)
+	if err != nil {
+		closeFunc()
+		return nil, nil, fmt.Errorf("problem creating file system player store: %v", err)
+	}
+
+	return store, closeFunc, nil
 }
 
 func initFile(file *os.File) error {

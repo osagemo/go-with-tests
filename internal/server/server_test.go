@@ -11,8 +11,8 @@ import (
 )
 
 func TestGETPlayers(t *testing.T) {
-	store := &StubPlayerStore{
-		scores: map[string]int{
+	store := &game.StubPlayerStore{
+		Scores: map[string]int{
 			"king": 20,
 			"sven": 10,
 		},
@@ -47,7 +47,7 @@ func TestGETPlayers(t *testing.T) {
 }
 
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
+	store := game.StubPlayerStore{
 		map[string]int{},
 		nil,
 	}
@@ -60,18 +60,13 @@ func TestStoreWins(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertResponseStatus(t, response, http.StatusAccepted)
-		if len(store.winCalls) != 1 {
-			t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-		}
-		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
-		}
+		game.AssertPlayerWin(t, &store, player)
 	})
 }
 
 func TestLeague(t *testing.T) {
-	store := &StubPlayerStore{
-		scores: map[string]int{
+	store := &game.StubPlayerStore{
+		Scores: map[string]int{
 			"king": 20,
 			"sven": 10,
 		},
@@ -152,25 +147,4 @@ func assertResponseContentType(t testing.TB, response *httptest.ResponseRecorder
 	if got != want {
 		t.Fatalf("Expected content-type %v, got %v", want, got)
 	}
-}
-
-type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	return s.scores[name]
-}
-
-func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
-}
-
-func (s *StubPlayerStore) GetLeague() game.League {
-	league := []game.Player{}
-	for name, wins := range s.scores {
-		league = append(league, game.Player{Name: name, Wins: wins})
-	}
-	return league
 }
